@@ -35,6 +35,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
 
 import static org.elasticsearch.metrics.JsonMetrics.JsonCounter;
@@ -104,15 +105,22 @@ public class MetricsElasticsearchModule extends Module {
             final Object value;
             try {
                 value = gauge.value().getValue();
-                String valueFieldname = dynamicValueFieldname ? getValueFieldname(value) : VALUE_FIELDNAME_DEFAULT;
                 if (value instanceof Iterable) { // Check if writing a single value or an array
                 	Iterable<?> iterable = (Iterable<?>) value;
+                	String valueFieldname = VALUE_FIELDNAME_DEFAULT;
+                	try { // Determine value type from first item in collection
+                		Object firstValueItem = iterable.iterator().next();
+                		valueFieldname = dynamicValueFieldname ? getValueFieldname(firstValueItem) : VALUE_FIELDNAME_DEFAULT;
+                	} catch (NoSuchElementException e) {
+                		// May be thrown by iterable.iterator().next() if value is empty collection
+                	}
                 	json.writeArrayFieldStart(valueFieldname);
                 	for (Object valueItem : iterable) {
                 		json.writeObject(valueItem);
                 	}
                 	json.writeEndArray();
                 } else {
+                	String valueFieldname = dynamicValueFieldname ? getValueFieldname(value) : VALUE_FIELDNAME_DEFAULT;
                 	json.writeObjectField(valueFieldname, value);	
                 }
             } catch (RuntimeException e) {
