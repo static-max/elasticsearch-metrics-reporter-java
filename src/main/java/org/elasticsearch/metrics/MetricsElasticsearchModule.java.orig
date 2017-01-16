@@ -61,6 +61,7 @@ public class MetricsElasticsearchModule extends Module {
         }
     }
     
+<<<<<<< HEAD
     /**
      * Get the fieldname for the "value" field depending on the type of value.
      * @param value
@@ -82,6 +83,8 @@ public class MetricsElasticsearchModule extends Module {
     	return fieldName;
     }
 
+=======
+>>>>>>> value-as-array
     private static class GaugeSerializer extends StdSerializer<JsonGauge> {
         private final String timestampFieldname;
         private final Map<String, Object> additionalFields;
@@ -104,17 +107,21 @@ public class MetricsElasticsearchModule extends Module {
             final Object value;
             try {
                 value = gauge.value().getValue();
+<<<<<<< HEAD
                 String valueFieldname = dynamicValueFieldname ? getValueFieldname(value) : VALUE_FIELDNAME_DEFAULT;
+                json.writeObjectField(valueFieldname, value);
+=======
                 if (value instanceof Iterable) { // Check if writing a single value or an array
                 	Iterable<?> iterable = (Iterable<?>) value;
-                	json.writeArrayFieldStart(valueFieldname);
+                	json.writeArrayFieldStart("value");
                 	for (Object valueItem : iterable) {
                 		json.writeObject(valueItem);
                 	}
                 	json.writeEndArray();
                 } else {
-                	json.writeObjectField(valueFieldname, value);	
+                	json.writeObjectField("value", value);	
                 }
+>>>>>>> value-as-array
             } catch (RuntimeException e) {
                 json.writeObjectField("error", e.toString());
             }
