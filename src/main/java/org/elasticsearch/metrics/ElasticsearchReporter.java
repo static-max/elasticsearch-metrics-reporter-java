@@ -447,7 +447,7 @@ public class ElasticsearchReporter extends ScheduledReporter {
      * Open a new HttpUrlConnection, in case it fails it tries for the next host in the configured list
      */
     private HttpURLConnection openConnection(String uri, String method) {
-        for (String host : hosts) {
+    	for (String host : hosts) {
             try {
                 URL templateUrl = new URL("http://" + host  + uri);
                 HttpURLConnection connection = ( HttpURLConnection ) templateUrl.openConnection();
@@ -461,9 +461,10 @@ public class ElasticsearchReporter extends ScheduledReporter {
 
                 return connection;
             } catch (IOException e) {
-                LOGGER.error("Error connecting to {}: {}", host, e);
+                LOGGER.info("Error connecting to {}: {}", host, e);
             }
         }
+    	LOGGER.error("Could not connect to any of the {} defined host(s)", hosts.length);
 
         return null;
     }
